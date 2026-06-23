@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 <title>豆娃跳跳乐</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
@@ -17,9 +17,9 @@ body{display:flex;align-items:center;justify-content:center;width:100vw;height:1
 .img-btn:active{transform:scale(.95)}
 .disabled-gray{filter:grayscale(1) brightness(.68);opacity:.58}
 .selected-glow{filter:drop-shadow(0 0 22px #fff65a) drop-shadow(0 0 34px #ffb300) drop-shadow(0 0 46px rgba(255,179,0,.65));transform:scale(1.045)}
-#homePage .home-stack{top:11.5%;gap:58px}
-#homeTitle{width:880px;height:430px}
-#startBtn,#historyBtn{width:560px;height:185px}
+#homePage .home-stack{top:9.5%;gap:42px}
+#homeTitle{width:990px;height:520px}
+#startBtn,#historyBtn{width:470px;height:155px}
 .top-title{position:absolute;top:5.2%;left:50%;transform:translateX(-50%);width:860px;height:245px}
 .bottom-left-btn{position:absolute;left:6%;bottom:5.2%;width:310px;height:135px;z-index:5}
 .bottom-right-btn{position:absolute;right:6%;bottom:5.2%;width:345px;height:145px;z-index:5}
@@ -31,9 +31,10 @@ body{display:flex;align-items:center;justify-content:center;width:100vw;height:1
 #gameHud{position:absolute;inset:0;pointer-events:none;z-index:10}
 .hud-block{position:absolute;pointer-events:none;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.35),0 0 10px rgba(0,0,0,.5);font-weight:900}
 #scoreHud{left:28px;top:24px;width:270px;height:95px;display:flex;align-items:center;justify-content:center;padding-left:70px;font-size:36px;background-position:center;background-size:contain;background-repeat:no-repeat}
-#hpHud{left:28px;top:122px;width:270px;height:95px;display:flex;align-items:center;justify-content:center;padding-left:58px;font-size:30px;letter-spacing:-3px;background-position:center;background-size:contain;background-repeat:no-repeat}
-.hp-heart{color:#ff2f4f;text-shadow:0 2px 0 #fff,0 3px 4px rgba(0,0,0,.28)}
-.hp-heart-empty{color:rgba(255,255,255,.9);text-shadow:0 2px 0 rgba(120,80,60,.45),0 3px 4px rgba(0,0,0,.2)}
+#hpHud{left:28px;top:118px;width:245px;height:86px;display:flex;align-items:center;justify-content:flex-start;padding-left:92px;padding-right:12px;font-size:23px;letter-spacing:0;gap:1px;background-position:center;background-size:contain;background-repeat:no-repeat}
+.hp-heart,.hp-heart-empty{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;line-height:1}
+.hp-heart{color:#ff2f4f;text-shadow:0 1px 0 #fff,0 2px 3px rgba(0,0,0,.28)}
+.hp-heart-empty{color:rgba(255,255,255,.9);text-shadow:0 1px 0 rgba(120,80,60,.45),0 2px 3px rgba(0,0,0,.2)}
 #gameTopBtns{position:absolute;top:24px;right:24px;display:flex;gap:14px;pointer-events:auto;z-index:20}
 .game-top-btn{width:116px;height:92px}
 #pauseMask{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:30;background:rgba(0,0,0,.35);pointer-events:auto}
@@ -54,6 +55,7 @@ body{display:flex;align-items:center;justify-content:center;width:100vw;height:1
 @media(max-width:600px){#tipBar{font-size:12px}}
 </style>
 </head>
+
 <body>
 <div id="gameShell">
   <section id="homePage" class="page active">
@@ -113,7 +115,6 @@ body{display:flex;align-items:center;justify-content:center;width:100vw;height:1
 
 <script>
 const W=1080,H=1920;
-
 function resizeGameShell(){
   const scale=Math.min(window.innerWidth/W,window.innerHeight/H);
   document.documentElement.style.setProperty("--game-scale",scale);
@@ -123,7 +124,6 @@ window.addEventListener("orientationchange",resizeGameShell);
 resizeGameShell();
 
 const ASSET_ROOTS=["./assets/","./"];
-
 const ASSET_NAMES=[
 "home-background.png","title.png","start.png","history.png",
 "select-background.png","select-character.png","select-map.png","goback.png","pick.png","enter.png",
@@ -203,7 +203,7 @@ const dom={
 
 const canvas=document.getElementById("gameCanvas");
 const ctx=canvas.getContext("2d");
-const STORAGE_KEY="douwa_jump_history_v8";
+const STORAGE_KEY="douwa_jump_history_v11";
 
 const SCENES=[
   {id:"beach",name:"夏日沙滩",bg:"game-background01.png",platforms:["pingtai01.png","pingtai02.png","pingtai03.png"],obstacles:["obstacle01.png","obstacle02.png"],recover:"recover01.png"},
@@ -222,12 +222,30 @@ let selectedCharacter=null,selectedMap=null;
 const keys={left:false,right:false,up:false,down:false};
 
 const game={
-  running:false,paused:false,ended:false,
-  sceneIndex:0,scene:SCENES[0],characterIndex:0,character:CHARACTERS[0],
-  player:null,platforms:[],coins:[],fallings:[],
-  cameraY:0,topPlatformY:0,
-  score:0,coinsCollected:0,hp:5,
-  lastTime:0,obstacleTimer:0,recoverTimer:0,invincibleTimer:0,operateTimer:0
+  running:false,
+  paused:false,
+  ended:false,
+  sceneIndex:0,
+  scene:SCENES[0],
+  characterIndex:0,
+  character:CHARACTERS[0],
+  player:null,
+  platforms:[],
+  coins:[],
+  fallings:[],
+  cameraY:0,
+  topPlatformY:0,
+  score:0,
+  coinsCollected:0,
+  hp:5,
+  lastTime:0,
+  obstacleTimer:0,
+  recoverTimer:0,
+  invincibleTimer:0,
+  operateTimer:0,
+  hitFlash:0,
+  shakeTimer:0,
+  effects:[]
 };
 
 function showPage(name){
@@ -347,26 +365,107 @@ function platformSizeByImage(name,desiredWidth){
   return {w,h};
 }
 
-function rectsOverlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
-function playerRect(){const p=game.player;return{x:p.x-p.w/2,y:p.y-p.h/2,w:p.w,h:p.h}}
+function rectsOverlap(a,b){
+  return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+}
+
+function insetRect(rect,insetXRate,insetYRate){
+  const insetX=rect.w*insetXRate;
+  const insetY=rect.h*insetYRate;
+  return {
+    x:rect.x+insetX,
+    y:rect.y+insetY,
+    w:rect.w-insetX*2,
+    h:rect.h-insetY*2
+  };
+}
+
+function overlapArea(a,b){
+  const x1=Math.max(a.x,b.x);
+  const y1=Math.max(a.y,b.y);
+  const x2=Math.min(a.x+a.w,b.x+b.w);
+  const y2=Math.min(a.y+a.h,b.y+b.h);
+  if(x2<=x1||y2<=y1)return 0;
+  return (x2-x1)*(y2-y1);
+}
+
+function getPlayerDamageHitBox(){
+  const p=game.player;
+  return insetRect({x:p.x-p.w/2,y:p.y-p.h/2,w:p.w,h:p.h},0.25,0.18);
+}
+
+function getPlayerPickupHitBox(){
+  const p=game.player;
+  return insetRect({x:p.x-p.w/2,y:p.y-p.h/2,w:p.w,h:p.h},0.18,0.14);
+}
+
+function getObstacleHitBox(item){
+  return insetRect({x:item.x,y:item.y,w:item.w,h:item.h},0.22,0.22);
+}
+
+function getRecoverHitBox(item){
+  return insetRect({x:item.x,y:item.y,w:item.w,h:item.h},0.14,0.14);
+}
+
+function isStrongObstacleHit(playerBox,obstacleBox){
+  if(!rectsOverlap(playerBox,obstacleBox))return false;
+  const area=overlapArea(playerBox,obstacleBox);
+  const minArea=Math.min(playerBox.w*playerBox.h,obstacleBox.w*obstacleBox.h);
+  return area/minArea>=0.16;
+}
+
+function isRecoverPickup(playerBox,recoverBox){
+  if(!rectsOverlap(playerBox,recoverBox))return false;
+  const area=overlapArea(playerBox,recoverBox);
+  const minArea=Math.min(playerBox.w*playerBox.h,recoverBox.w*recoverBox.h);
+  return area/minArea>=0.08;
+}
+
+function playerRect(){
+  const p=game.player;
+  return{x:p.x-p.w/2,y:p.y-p.h/2,w:p.w,h:p.h};
+}
+
 function entityScreenY(worldY){return worldY-game.cameraY}
+function getPlatformContactY(platform){return platform.y+Math.min(18,platform.h*0.1)}
 
 function resetGame(){
   game.scene=SCENES[game.sceneIndex];
   game.character=CHARACTERS[game.characterIndex];
-  game.running=true;game.paused=false;game.ended=false;
-  game.cameraY=0;game.topPlatformY=H-110;
-  game.score=0;game.coinsCollected=0;game.hp=5;
+  game.running=true;
+  game.paused=false;
+  game.ended=false;
+  game.cameraY=0;
+  game.topPlatformY=H-110;
+  game.score=0;
+  game.coinsCollected=0;
+  game.hp=5;
   game.lastTime=performance.now();
-  game.obstacleTimer=1.5;game.recoverTimer=8;game.invincibleTimer=0;game.operateTimer=0;
+  game.obstacleTimer=1.5;
+  game.recoverTimer=8;
+  game.invincibleTimer=0;
+  game.operateTimer=0;
+  game.hitFlash=0;
+  game.shakeTimer=0;
+  game.effects=[];
 
   game.player={
-    x:W/2,y:H-400,prevY:H-400,
-    w:170,h:215,vx:0,vy:0,speed:14,
-    grounded:false,jumpsUsed:0,facing:1
+    x:W/2,
+    y:H-430,
+    prevY:H-430,
+    w:195,
+    h:248,
+    vx:0,
+    vy:0,
+    speed:14,
+    grounded:false,
+    jumpsUsed:0,
+    facing:1
   };
 
-  game.platforms=[];game.coins=[];game.fallings=[];
+  game.platforms=[];
+  game.coins=[];
+  game.fallings=[];
   createInitialPlatforms();
   updateHud();
   dom.pauseMask.classList.remove("active");
@@ -400,20 +499,24 @@ function addPlatformAbove(){
   const spring=Math.random()<.16;
 
   const platform={
-    x,y:game.topPlatformY,
-    w:platformSize.w,h:platformSize.h,
+    x,
+    y:game.topPlatformY,
+    w:platformSize.w,
+    h:platformSize.h,
     imgName:platformImageName,
     moving,
     vx:moving?choose([-1,1])*rand(1.4,3.4):0,
     spring
   };
+
   game.platforms.push(platform);
 
   if(Math.random()<.62){
     game.coins.push({
       x:x+platformSize.w/2-32,
       y:platform.y-82,
-      w:64,h:64,
+      w:64,
+      h:64,
       collected:false
     });
   }
@@ -428,6 +531,71 @@ function updateHud(){
   dom.hpHud.innerHTML=html;
 }
 
+function spawnDamageEffect(x,y){
+  game.hitFlash=0.32;
+  game.shakeTimer=0.22;
+  game.effects.push({type:"text",text:"-1 ❤",x,y:y-80,vx:rand(-0.7,0.7),vy:-3.2,life:0.85,maxLife:0.85,color:"#ff2d3d",size:46});
+  for(let i=0;i<18;i++){
+    game.effects.push({
+      type:"particle",
+      x:x+rand(-35,35),
+      y:y+rand(-45,35),
+      vx:rand(-5.2,5.2),
+      vy:rand(-6.5,-1.5),
+      gravity:0.32,
+      life:rand(0.38,0.72),
+      maxLife:0.72,
+      color:choose(["#ff2d3d","#ff6b6b","#ffb0b0"]),
+      radius:rand(6,13)
+    });
+  }
+}
+
+function spawnHealEffect(x,y){
+  game.effects.push({type:"text",text:"+1 ❤",x,y:y-82,vx:rand(-0.4,0.4),vy:-3.0,life:0.95,maxLife:0.95,color:"#ffe258",size:46});
+  for(let i=0;i<22;i++){
+    game.effects.push({
+      type:"particle",
+      x:x+rand(-45,45),
+      y:y+rand(-50,30),
+      vx:rand(-3.8,3.8),
+      vy:rand(-5.5,-1.2),
+      gravity:0.16,
+      life:rand(0.48,0.9),
+      maxLife:0.9,
+      color:choose(["#ffe258","#ffbe2d","#fff3a0","#ff9824"]),
+      radius:rand(5,12)
+    });
+  }
+  for(let i=0;i<8;i++){
+    game.effects.push({type:"ring",x,y,radius:18+i*4,life:0.45+i*0.03,maxLife:0.45+i*0.03,color:"#ffd85a"});
+  }
+}
+
+function updateEffects(dt){
+  if(game.hitFlash>0)game.hitFlash-=dt;
+  if(game.shakeTimer>0)game.shakeTimer-=dt;
+
+  for(const effect of game.effects){
+    effect.life-=dt;
+    if(effect.type==="particle"){
+      effect.x+=effect.vx;
+      effect.y+=effect.vy;
+      effect.vy+=effect.gravity;
+    }
+    if(effect.type==="text"){
+      effect.x+=effect.vx;
+      effect.y+=effect.vy;
+      effect.vy+=0.06;
+    }
+    if(effect.type==="ring"){
+      effect.radius+=4.2;
+    }
+  }
+
+  game.effects=game.effects.filter(effect=>effect.life>0);
+}
+
 function startGame(sceneIndex){
   game.sceneIndex=sceneIndex;
   game.characterIndex=selectedCharacter??0;
@@ -439,6 +607,7 @@ function startGame(sceneIndex){
 function tryJump(forceSecondJump){
   if(!game.running||game.paused||game.ended)return;
   const p=game.player;
+
   if(p.grounded){
     p.vy=-29;
     p.grounded=false;
@@ -446,6 +615,7 @@ function tryJump(forceSecondJump){
     game.operateTimer=.18;
     return;
   }
+
   if(forceSecondJump&&p.jumpsUsed<2){
     p.vy=-27;
     p.jumpsUsed=2;
@@ -468,6 +638,7 @@ function update(dt){
 
   if(game.invincibleTimer>0)game.invincibleTimer-=dt;
   if(game.operateTimer>0)game.operateTimer-=dt;
+  updateEffects(dt);
 
   let targetVX=0;
   if(keys.left)targetVX-=p.speed;
@@ -505,8 +676,16 @@ function updatePlatforms(){
   for(const platform of game.platforms){
     if(!platform.moving)continue;
     platform.x+=platform.vx;
-    if(platform.x<20){platform.x=20;platform.vx*=-1}
-    if(platform.x+platform.w>W-20){platform.x=W-20-platform.w;platform.vx*=-1}
+
+    if(platform.x<20){
+      platform.x=20;
+      platform.vx*=-1;
+    }
+
+    if(platform.x+platform.w>W-20){
+      platform.x=W-20-platform.w;
+      platform.vx*=-1;
+    }
   }
 }
 
@@ -514,17 +693,19 @@ function handlePlatformCollision(){
   const p=game.player;
   const prevBottom=p.prevY+p.h/2;
   const currBottom=p.y+p.h/2;
+
   if(p.vy<0)return;
 
   for(const platform of game.platforms){
+    const contactY=getPlatformContactY(platform);
     const footX1=p.x-p.w*.34;
     const footX2=p.x+p.w*.34;
     const overlapX=footX2>platform.x&&footX1<platform.x+platform.w;
-    const crossed=prevBottom<=platform.y+18&&currBottom>=platform.y;
-    const notTooDeep=currBottom<=platform.y+platform.h+35;
+    const crossed=prevBottom<=contactY+18&&currBottom>=contactY;
+    const notTooDeep=currBottom<=contactY+platform.h+35;
 
     if(overlapX&&crossed&&notTooDeep){
-      p.y=platform.y-p.h/2;
+      p.y=contactY-p.h/2;
       p.grounded=true;
       p.jumpsUsed=0;
 
@@ -536,6 +717,7 @@ function handlePlatformCollision(){
       }else{
         p.vy=0;
       }
+
       return;
     }
   }
@@ -575,13 +757,15 @@ function spawnFallings(dt){
       type:"obstacle",
       x:rand(60,W-60-size),
       y:game.cameraY-rand(180,420),
-      w:size,h:size,
-      vy:rand(6.5,10.5),
+      w:size,
+      h:size,
+      vy:rand(6.8,10.8),
       vx:rand(-1.4,1.4),
       imgName:choose(game.scene.obstacles),
       rotate:rand(0,Math.PI*2),
       spin:rand(-.04,.04),
-      hit:false
+      hit:false,
+      glowPhase:rand(0,Math.PI*2)
     });
   }
 
@@ -592,44 +776,58 @@ function spawnFallings(dt){
       type:"recover",
       x:rand(70,W-70-size),
       y:game.cameraY-rand(180,420),
-      w:size,h:size,
-      vy:rand(4.5,7.5),
-      vx:rand(-.8,.8),
+      w:size,
+      h:size,
+      vy:rand(2.4,4.2),
+      vx:rand(-0.55,0.55),
       imgName:game.scene.recover,
       rotate:0,
-      spin:.02,
-      hit:false
+      spin:.018,
+      hit:false,
+      glowPhase:rand(0,Math.PI*2)
     });
   }
 }
 
 function updateFallings(){
-  const playerBox=playerRect();
+  const damagePlayerBox=getPlayerDamageHitBox();
+  const pickupPlayerBox=getPlayerPickupHitBox();
+
   for(const item of game.fallings){
     item.x+=item.vx;
     item.y+=item.vy;
     item.rotate+=item.spin;
 
-    if(item.x<0||item.x+item.w>W)item.vx*=-1;
+    if(item.x<0||item.x+item.w>W){
+      item.vx*=-1;
+    }
+
     if(item.hit)continue;
 
-    const itemBox={x:item.x,y:item.y,w:item.w,h:item.h};
-    if(rectsOverlap(playerBox,itemBox)){
-      item.hit=true;
-
-      if(item.type==="obstacle"){
+    if(item.type==="obstacle"){
+      const obstacleBox=getObstacleHitBox(item);
+      if(isStrongObstacleHit(damagePlayerBox,obstacleBox)){
         if(game.invincibleTimer<=0){
+          item.hit=true;
           game.hp-=1;
           game.invincibleTimer=1.15;
+          spawnDamageEffect(game.player.x,game.player.y-game.cameraY);
+
           if(game.hp<=0){
             game.hp=0;
             endGame("生命值耗尽！");
           }
         }
       }
+    }
 
-      if(item.type==="recover"){
+    if(item.type==="recover"){
+      const recoverBox=getRecoverHitBox(item);
+      if(isRecoverPickup(pickupPlayerBox,recoverBox)){
+        item.hit=true;
+        const oldHp=game.hp;
         game.hp=Math.min(5,game.hp+1);
+        spawnHealEffect(game.player.x,game.player.y-game.cameraY);
       }
     }
   }
@@ -766,12 +964,10 @@ function getProcessedCharacterImage(image){
   const offCanvas=document.createElement("canvas");
   offCanvas.width=sourceW;
   offCanvas.height=sourceH;
-
   const offCtx=offCanvas.getContext("2d",{willReadFrequently:true});
 
   try{
     offCtx.drawImage(image,0,0);
-
     const imageData=offCtx.getImageData(0,0,sourceW,sourceH);
     const data=imageData.data;
     const visited=new Uint8Array(sourceW*sourceH);
@@ -779,12 +975,9 @@ function getProcessedCharacterImage(image){
 
     function pushIfBackground(x,y){
       if(x<0||y<0||x>=sourceW||y>=sourceH)return;
-
       const id=y*sourceW+x;
       if(visited[id])return;
-
       const dataIndex=id*4;
-
       if(isCharacterBackgroundPixel(data,dataIndex)){
         visited[id]=1;
         queue.push(id);
@@ -802,12 +995,10 @@ function getProcessedCharacterImage(image){
     }
 
     let head=0;
-
     while(head<queue.length){
       const id=queue[head++];
       const x=id%sourceW;
       const y=Math.floor(id/sourceW);
-
       pushIfBackground(x+1,y);
       pushIfBackground(x-1,y);
       pushIfBackground(x,y+1);
@@ -816,12 +1007,10 @@ function getProcessedCharacterImage(image){
 
     for(let pass=0;pass<2;pass++){
       const toRemove=[];
-
       for(let y=1;y<sourceH-1;y++){
         for(let x=1;x<sourceW-1;x++){
           const id=y*sourceW+x;
           if(visited[id])continue;
-
           const dataIndex=id*4;
           if(!isCharacterBackgroundPixel(data,dataIndex))continue;
 
@@ -855,7 +1044,6 @@ function getProcessedCharacterImage(image){
         }
 
         const alpha=data[dataIndex+3];
-
         if(alpha>10){
           if(x<minX)minX=x;
           if(y<minY)minY=y;
@@ -923,7 +1111,7 @@ function drawCharacterImage(image,x,y,w,h,flipX=false,alpha=1){
   }
 
   const drawX=x+(w-drawW)/2;
-  const drawY=y+(h-drawH)/2;
+  const drawY=y+h-drawH;
 
   ctx.save();
   ctx.globalAlpha=alpha;
@@ -931,30 +1119,9 @@ function drawCharacterImage(image,x,y,w,h,flipX=false,alpha=1){
   if(flipX){
     ctx.translate(drawX+drawW,drawY);
     ctx.scale(-1,1);
-
-    ctx.drawImage(
-      processed.canvas,
-      processed.sx,
-      processed.sy,
-      processed.sw,
-      processed.sh,
-      0,
-      0,
-      drawW,
-      drawH
-    );
+    ctx.drawImage(processed.canvas,processed.sx,processed.sy,processed.sw,processed.sh,0,0,drawW,drawH);
   }else{
-    ctx.drawImage(
-      processed.canvas,
-      processed.sx,
-      processed.sy,
-      processed.sw,
-      processed.sh,
-      drawX,
-      drawY,
-      drawW,
-      drawH
-    );
+    ctx.drawImage(processed.canvas,processed.sx,processed.sy,processed.sw,processed.sh,drawX,drawY,drawW,drawH);
   }
 
   ctx.restore();
@@ -962,22 +1129,31 @@ function drawCharacterImage(image,x,y,w,h,flipX=false,alpha=1){
 
 function draw(){
   ctx.clearRect(0,0,W,H);
+  ctx.save();
+
+  if(game.shakeTimer>0){
+    const power=12*(game.shakeTimer/0.22);
+    ctx.translate(rand(-power,power),rand(-power,power));
+  }
+
   drawCoverImage(img(game.scene.bg),0,0,W,H);
 
-  if(!game.player)return;
+  if(game.player){
+    drawPlatforms();
+    drawCoins();
+    drawFallings();
+    drawPlayer();
+    drawEffects();
+  }
 
-  drawPlatforms();
-  drawCoins();
-  drawFallings();
-  drawPlayer();
+  ctx.restore();
+  drawScreenFlash();
 }
 
 function drawPlatforms(){
   for(const platform of game.platforms){
     const sy=entityScreenY(platform.y);
-
     if(sy>H+180||sy<-220)continue;
-
     drawImageFit(img(platform.imgName),platform.x,sy,platform.w,platform.h);
 
     if(platform.spring){
@@ -988,7 +1164,6 @@ function drawPlatforms(){
 
 function drawSpring(x,y,w,h){
   ctx.save();
-
   ctx.fillStyle="#d81616";
   ctx.strokeStyle="#fff";
   ctx.lineWidth=8;
@@ -1003,11 +1178,9 @@ function drawSpring(x,y,w,h){
   ctx.beginPath();
 
   const steps=5;
-
   for(let i=0;i<=steps;i++){
     const px=x+(i/steps)*w;
     const py=y+10+(i%2===0?0:h-30);
-
     if(i===0)ctx.moveTo(px,py);
     else ctx.lineTo(px,py);
   }
@@ -1021,40 +1194,94 @@ function drawCoins(){
 
   for(const coin of game.coins){
     if(coin.collected)continue;
-
     const sy=entityScreenY(coin.y);
-
     if(sy>H+150||sy<-150)continue;
 
     const pulse=Math.sin(performance.now()/160+coin.x*.01)*.08+1;
     const size=coin.w*pulse;
 
-    drawImageFit(
-      coinImage,
-      coin.x+coin.w/2-size/2,
-      sy+coin.h/2-size/2,
-      size,
-      size
-    );
+    drawImageFit(coinImage,coin.x+coin.w/2-size/2,sy+coin.h/2-size/2,size,size);
   }
 }
 
 function drawFallings(){
+  const now=performance.now();
+
   for(const item of game.fallings){
     const sy=entityScreenY(item.y);
-
     if(sy>H+180||sy<-220)continue;
 
-    drawImageFit(
-      img(item.imgName),
-      item.x,
-      sy,
-      item.w,
-      item.h,
-      false,
-      1,
-      item.rotate
-    );
+    if(item.type==="recover"){
+      const cx=item.x+item.w/2;
+      const cy=sy+item.h/2;
+      const pulse=0.5+Math.sin(now/240+item.glowPhase)*0.5;
+      const glowRadius=item.w*(1.0+pulse*0.38);
+
+      ctx.save();
+      const gradient=ctx.createRadialGradient(cx,cy,item.w*0.15,cx,cy,glowRadius);
+      gradient.addColorStop(0,"rgba(255,226,88,0.72)");
+      gradient.addColorStop(0.36,"rgba(255,190,45,0.42)");
+      gradient.addColorStop(0.68,"rgba(255,150,24,0.18)");
+      gradient.addColorStop(1,"rgba(255,190,45,0)");
+      ctx.fillStyle=gradient;
+      ctx.beginPath();
+      ctx.arc(cx,cy,glowRadius,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    drawImageFit(img(item.imgName),item.x,sy,item.w,item.h,false,1,item.rotate);
+  }
+}
+
+function drawEffects(){
+  for(const effect of game.effects){
+    const t=Math.max(0,effect.life/effect.maxLife);
+
+    if(effect.type==="particle"){
+      ctx.save();
+      ctx.globalAlpha=t;
+      ctx.fillStyle=effect.color;
+      ctx.beginPath();
+      ctx.arc(effect.x,effect.y,effect.radius*(0.65+t*0.35),0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    if(effect.type==="text"){
+      ctx.save();
+      ctx.globalAlpha=t;
+      ctx.font=`900 ${effect.size}px Microsoft YaHei, Arial`;
+      ctx.textAlign="center";
+      ctx.textBaseline="middle";
+      ctx.lineWidth=8;
+      ctx.strokeStyle="rgba(255,255,255,0.95)";
+      ctx.fillStyle=effect.color;
+      ctx.strokeText(effect.text,effect.x,effect.y);
+      ctx.fillText(effect.text,effect.x,effect.y);
+      ctx.restore();
+    }
+
+    if(effect.type==="ring"){
+      ctx.save();
+      ctx.globalAlpha=t*0.75;
+      ctx.strokeStyle=effect.color;
+      ctx.lineWidth=8*t;
+      ctx.beginPath();
+      ctx.arc(effect.x,effect.y,effect.radius,0,Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+}
+
+function drawScreenFlash(){
+  if(game.hitFlash>0){
+    const alpha=Math.min(0.28,game.hitFlash/0.32*0.28);
+    ctx.save();
+    ctx.fillStyle=`rgba(255,35,45,${alpha})`;
+    ctx.fillRect(0,0,W,H);
+    ctx.restore();
   }
 }
 
@@ -1062,7 +1289,6 @@ function drawPlayer(){
   const p=game.player;
   const sy=entityScreenY(p.y);
   const sx=p.x;
-
   const operating=keys.left||keys.right||keys.up||keys.down||game.operateTimer>0;
   const imageName=operating?game.character.move:game.character.idle;
 
@@ -1072,23 +1298,13 @@ function drawPlayer(){
     alpha=Math.floor(performance.now()/90)%2===0?.42:1;
   }
 
-  drawCharacterImage(
-    img(imageName),
-    sx-p.w/2,
-    sy-p.h/2,
-    p.w,
-    p.h,
-    p.facing<0,
-    alpha
-  );
+  drawCharacterImage(img(imageName),sx-p.w/2,sy-p.h/2,p.w,p.h,p.facing<0,alpha);
 }
 
 function togglePause(){
   if(!game.running||game.ended)return;
-
   game.paused=!game.paused;
   dom.pauseMask.classList.toggle("active",game.paused);
-
   if(!game.paused){
     game.lastTime=performance.now();
   }
@@ -1102,7 +1318,6 @@ function initEvents(){
   });
 
   dom.historyBtn.addEventListener("click",showHistory);
-
   dom.characterBackBtn.addEventListener("click",()=>showPage("home"));
 
   dom.characterPickBtn.addEventListener("click",()=>{
@@ -1110,7 +1325,6 @@ function initEvents(){
       showModal("提示","请先选择一个角色。",[{text:"知道了",onClick:closeModal}]);
       return;
     }
-
     selectedMap=null;
     updateMapSelect();
     showPage("map");
@@ -1130,7 +1344,6 @@ function initEvents(){
       showModal("提示","请先选择一个场景。",[{text:"知道了",onClick:closeModal}]);
       return;
     }
-
     closeModal();
     startGame(selectedMap);
   });
@@ -1226,17 +1439,13 @@ function initEvents(){
 
 async function boot(){
   resizeGameShell();
-
   await preloadAssets();
-
   applyUiImages();
   initEvents();
   updateCharacterSelect();
   updateMapSelect();
-
   game.scene=SCENES[0];
   game.character=CHARACTERS[0];
-
   updateHud();
   draw();
 }
@@ -1244,7 +1453,6 @@ async function boot(){
 if(!CanvasRenderingContext2D.prototype.roundRect){
   CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
     const radius=Math.min(r,w/2,h/2);
-
     this.beginPath();
     this.moveTo(x+radius,y);
     this.arcTo(x+w,y,x+w,y+h,radius);
@@ -1252,7 +1460,6 @@ if(!CanvasRenderingContext2D.prototype.roundRect){
     this.arcTo(x,y+h,x,y,radius);
     this.arcTo(x,y,x+w,y,radius);
     this.closePath();
-
     return this;
   };
 }
